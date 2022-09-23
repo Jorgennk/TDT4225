@@ -16,17 +16,6 @@ class Table:
 
 
 class Imsdal:
-
-    #read lines from files
-    def read_from_file(self, path):
-        f = open(path)
-        lines = f.readlines()
-
-        stripped_lines = []
-        for line in lines:
-            stripped_lines.append(self.cut_newline(line))
-        
-        return stripped_lines
     
 
     def __init__(self) -> None:
@@ -34,6 +23,20 @@ class Imsdal:
         self.db_connection = self.connection.db_connection
         self.cursor = self.connection.cursor
 
+    
+    
+    #read lines from files
+    def read_from_file(self, path):
+        f = open(path)
+        lines = f.readlines()
+
+        stripped_lines = []
+        for line in lines[6:]:
+            stripped_lines.append(self.cut_newline(line))
+        
+        return stripped_lines
+
+        
 
     def create_table(self, table_name):
         query = """CREATE TABLE IF NOT EXISTS %s (
@@ -163,7 +166,7 @@ def main():
 
 
 program = Imsdal()
-print(program.get_activity(program.get_labeled_ids()))
+print(program.read_from_file("dataset\\Data\\000\Trajectory\\20081023025304.plt"))
 """
 if __name__ == '__main__':
     main()
