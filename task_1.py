@@ -1,6 +1,9 @@
 from logging.config import listen
 from DbConnector import DbConnector
 from tabulate import tabulate
+import datetime
+import os 
+
 
 
 class Table:
@@ -24,9 +27,14 @@ class Imsdal:
         self.cursor = self.connection.cursor
 
     
+    def cut_newline(self, input_line) -> str:
     
-    #read lines from files
-    def read_from_file(self, path):
+        input_line = input_line.rstrip("\n")
+
+        return input_line
+    
+    #read lines from trajectories
+    def read_from_trajectory(self, path) -> list:
         f = open(path)
         lines = f.readlines()
 
@@ -36,25 +44,35 @@ class Imsdal:
         
         return stripped_lines
 
+
+    #Pretty similar to above, check if this can be done easier
+    def read_from_labels(self, path) -> list:
+        f = open(path)
+        lines = f.readlines()
+
+        stripped_lines = []
+        for line in lines:
+            stripped_lines.append(self.cut_newline(line))
         
+        return stripped_lines
+
+
 
     def create_table(self, table_name):
         query = """CREATE TABLE IF NOT EXISTS %s (
                    id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-                   name VARCHAR(30))
+                   user_id INT NOT NULL,
+                   start_date DATETIME,
+                   end_date DATETIME,
+                   name VARCHAR(30),
+                   FOREIGN KEY (user_id) REFERENCES User(id))
                 """
         # This adds table_name to the %s variable and executes the query
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
 
 
-    def cut_newline(self, input_line):
-
-        input_line = input_line.rstrip("\n")
-
-
-        return input_line
-
+    #Returns labeled ids as a list.
     def get_labeled_ids(self):
 
         f = open("dataset\labeled_ids.txt")
@@ -66,58 +84,81 @@ class Imsdal:
 
         return labeled_ids
 
-    def retrieve_list(self) -> list:
-        #This method retrives a list of the numbers (folder names) "XXX" which will be used as user ID
-        import os 
+    #This method retrives a list of the numbers (folder names) "XXX" which will be used as user ID
+    def retrieve_list(self, filter=True) -> list:
+        
         directory_list = list()
         for root, dirs, files in os.walk("./dataset/Data/", topdown=False, followlinks=False):
             for name in dirs:
                 try:
-                    #Simple check to see if they are nuers
-                    int(name)
+                    int(name) # Simple check to see if name is number
                     directory_list.append(name)
                 except:
                     pass
-                
+       
         labeled_ids = self.get_labeled_ids()
-        for label in labeled_ids:
-            if label not in directory_list:
-                labeled_ids.remove(label)
+        if filter:
+            for label in labeled_ids:
+                if label not in directory_list:
+                    labeled_ids.remove(label)
 
         return labeled_ids
 
+    def insert_users(self, list_of_users):
+        labeled_users = self.retrieve_list()
+        query = "INSERT INTO User (id, has_labels) VALUES (%s,%s)"
+        to_be_inserted = []
+        for user in list_of_users:
+            to_be_inserted.append((user, user in labeled_users))
+        print(to_be_inserted)
+        try:
+            self.cursor.executemany(query, to_be_inserted)
+            self.db_connection.commit()
+        except:
+            self.db_connection.rollback()
+
+
+ 
     def get_activity(self, labeled_ids):
-        print(f"HER @@@@@@@{labeled_ids}")
+        content = []
         for user in labeled_ids:
+            #print(user)
             path = f"./dataset/Data/{user}/labels.txt"
-            activity = self.read_from_file(path)
-            return activity
-
+            content.append((user, self.format_activity(self.read_from_trajectory(path))))
         
+        return content
 
+    #Basically just puts the different fields in into separated list
+    #so they are easier to work with
+    def format_activity(self, list_of_entries) -> list:
 
+        formatted = []
+        for line in list_of_entries:
+            #Split on tabs
+            formatted.append(line[1].split("\t"))
 
+        return formatted
 
+    
 
-
-    def insert_data(self, table_name):
-        names = self.retrieve_list()
+    def insert_data(self, table_name, names, user_id):
+        name_tuples = []
         for name in names:
-            # Take note that the name is wrapped in '' --> '%s' because it is a string,
-            # while an int would be %s etc
-            query = "INSERT INTO %s (name) VALUES ('%s')"
-            self.cursor.execute(query % (table_name, name))
+            name_tuples.append(tuple(user_id, name))
+        query = f"INSERT INTO {table_name} (user_id, start_date, end_date, name) VALUES (%s,%s,%s)"
+        #print(name_tuples)
+        self.cursor.executemany(query, name_tuples)
         self.db_connection.commit()
 
 
 
-    def insert_data_name(self, table_name):
-        names = self.retrieve_list()
-        for name in names:
+    def insert_data_name(self, table_name, list_of_users):
+        for name in list_of_users:
             # Take note that the name is wrapped in '' --> '%s' because it is a string,
             # while an int would be %s etc
-            query = "INSERT INTO %s (name) VALUES ('%s')"
-            self.cursor.execute(query % (table_name, name))
+            pass
+        query = "INSERT INTO %s (name) VALUES ('%s')"
+        self.cursor.execute(query % (table_name, name))
         self.db_connection.commit()
 
 
@@ -144,33 +185,26 @@ class Imsdal:
 
 
 
-
 def main():
     program = None
-    try:
-        program = Imsdal()
-        program.create_table(table_name="User")
+    program = Imsdal()
+    program.create_table(table_name="Activity")
+
+    users = program.retrieve_list(filter = False)
+    activity = program.get_activity(users)
+
+    for element in activity:
+        user = element[0]
+        content = element[1]
+        program.insert_data("Activity", content, user)
+    program.insert_users(users)
+    
+    #print(program.get_trackpoints(users[1]))
         
-        content = program.retrieve_list()
-        program.insert_data(table_name="User")
-        _ = program.fetch_data(table_name="User")
-        program.drop_table(table_name="User")
-        # Check that the table is dropped
-        program.show_tables()
-    except Exception as e:
-        print("ERROR: Failed to use database:", e)
-    finally:
-        if program:
-            program.connection.close_connection()
 
 
-
-program = Imsdal()
-print(program.read_from_file("dataset\\Data\\000\Trajectory\\20081023025304.plt"))
-"""
 if __name__ == '__main__':
     main()
-"""
 
 """
 f = open("./dataset/Data/000/Trajectory/20081023025304.plt", "r")
