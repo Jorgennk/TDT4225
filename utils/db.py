@@ -1,5 +1,4 @@
 from tabulate import tabulate
-import utils.queries as queries
 
 
 def drop_table(db, table_name):
@@ -35,7 +34,7 @@ def insert_row(db, query: str, payload: tuple):
         db.db_connection.rollback()
 
 
-def insert_rows(db, query:str, payload: list):
+def insert_rows(db, query: str, payload: list):
     """ Insert multiple rows in batches. Payload must be a list of tuples """
     try:
         db.cursor.executemany(query, payload)
@@ -44,26 +43,10 @@ def insert_rows(db, query:str, payload: list):
         db.db_connection.rollback()
 
 
-def execute_query(db, query:str):
+def execute_query(db, query: str):
     """ Execute query that requires no payload """
     try:
         db.cursor.execute(query)
         db.db_connection.commit()
     except:
         db.db_connection.rollback()
-
-
-def insert_users(db, list_of_users: list):
-    """ Inserts users from list """
-    labeled_users = db.retrieve_list()
-    to_be_inserted = []
-    for user in list_of_users:
-        to_be_inserted.append((user, user in labeled_users))
-    insert_rows(db, queries.INSERT_USER, to_be_inserted)
-
-
-def insert_activities(db, names: list, user_id: int):
-    to_be_inserted = []
-    for name in names:
-        to_be_inserted.append((user_id, name))
-    insert_rows(db, queries.INSERT_ACTIVITY, to_be_inserted)

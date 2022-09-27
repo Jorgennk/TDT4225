@@ -1,63 +1,49 @@
 import os
-from utils.other import cut_newline
 
 
-# read lines from trajectories
-def read_from_trajectory(path) -> list:
-    f = open(path)
-    lines = f.readlines()
-
-    stripped_lines = []
-    for line in lines[6:]:  # ignore first 6 lines
-        stripped_lines.append(cut_newline(line))
-    return stripped_lines
+def read_trajectory_data(path) -> list:
+    """ Read trajectory data, ignore first 6 lines """
+    with open(path) as f:
+        return f.readlines()[6:]
 
 
-# Pretty similar to above, check if this can be done easier
-def read_from_labels(path) -> list:
-    f = open(path)
-    lines = f.readlines()
-    stripped_lines = []
-    for line in lines:
-        stripped_lines.append(cut_newline(line))
-
-    return stripped_lines
+def read_rstrip_file(path) -> list:
+    """ Right-strip lines and read file content """
+    with open(path) as f:
+        return list(map(lambda line: line.rstrip("\n"), f.readlines()))
 
 
-# Returns labeled ids as a list.
-def get_labeled_ids():
-    f = open("dataset\labeled_ids.txt")
-    lines = f.readlines()
-
-    labeled_ids = []
-    for line in lines:
-        labeled_ids.append(cut_newline(line))
-
-    return labeled_ids
+def get_labeled_ids() -> list:
+    """ Returns labeled ids as a list """
+    return read_rstrip_file(os.path.join("dataset", "labeled_ids.txt"))
 
 
-# This method retrieves a list of the numbers (folder names) "XXX" which will be used as user ID
 def retrieve_list(filter_ids=True) -> list:
-    directory_list = list()
-    for root, dirs, files in os.walk("./dataset/Data/", topdown=False, followlinks=False):
-        for name in dirs:
-            try:
-                int(name)  # Simple check to see if name is number
-                directory_list.append(name)
-            except:
-                pass
-
+    """ Return list of user IDs with labeled activities, based on directory structure """
+    # FIXME: Why do we even want to return labeled ids without checking if they have an associated dir?
     labeled_ids = get_labeled_ids()
-    if filter_ids:
-        for label in labeled_ids:
-            if label not in directory_list:
-                labeled_ids.remove(label)
-    return labeled_ids
+    if not filter_ids:
+        return labeled_ids
+    # get all user directories
+    directory_list = []
+    for root, dirs, files in os.walk("./dataset/Data/", topdown=False, followlinks=False):
+        for dir_name in dirs:
+            if dir_name.isnumeric():
+                directory_list.append(dir_name)
+    # get all label ids that have an associated directory
+    return list(filter(lambda labeled_id: labeled_id in directory_list, get_labeled_ids()))
 
 
-def get_activity(self, labeled_ids):
-    content = []
+def get_activities(labeled_ids):
+    """ Get activity data for all users listed in labeled_ids """
+    activities = []
+    formatted_data = []
     for user in labeled_ids:
-        path = f"./dataset/Data/{user}/labels.txt"
-        content.append((user, self.format_activity(self.read_from_trajectory(path))))
-    return content
+        path = os.path.join("dataset", "Data", user, "labels.txt")
+        """ Format activity entries into a list """
+        for line in read_trajectory_data(path):
+            # Split on tabs
+            formatted_data.append(line[1].split("\t"))
+        activities.append((user, formatted_data))
+        formatted_data.clear()
+    return activities
