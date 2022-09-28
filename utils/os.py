@@ -15,7 +15,7 @@ def read_rstrip_file(path) -> list:
 
 
 def get_labeled_ids() -> list:
-    """ Returns labeled ids as a list """
+    """ Returns labeled ids as a list, don't control list with directory structure """
     return read_rstrip_file(os.path.join(config("DATASET_ROOT_PATH"), "dataset", "labeled_ids.txt"))
 
 
@@ -30,27 +30,23 @@ def get_all_users() -> list:
     return result
 
 
-def get_labeled_users(filter_ids=True) -> list:
+def get_labeled_users() -> list:
     """ Return list of user IDs with labeled activities, based on directory structure """
-    # FIXME: Why do we even want to return labeled ids without checking if they have an associated dir?
     labeled_ids = get_labeled_ids()
-    if not filter_ids:
-        return labeled_ids
     all_users = get_all_users()
     # get all label ids that have an associated directory
-    return list(filter(lambda labeled_id: labeled_id in all_users, get_labeled_ids()))
+    return list(filter(lambda labeled_id: labeled_id in all_users, labeled_ids))
 
 
-def get_activities(labeled_ids):
-    """ Get activity data for all users listed in labeled_ids """
-    activities = []
-    formatted_data = []
+def get_activities():
+    """
+    Get activity data for all users listed in labeled_ids.
+    Format: (end_date, start_date, transportation_mode, user_id)
+    """
+    labeled_ids = get_labeled_ids()
+    activity_data = []
     for user in labeled_ids:
         path = os.path.join(config("DATASET_ROOT_PATH"), "dataset", "Data", user, "labels.txt")
-        """ Format activity entries into a list """
-        for line in read_trajectory_data(path):
-            # Split on tabs
-            formatted_data.append(line[1].split("\t"))
-        activities.append((user, formatted_data))
-        formatted_data.clear()
-    return activities
+        # Format activity entries into a list
+        activity_data += tuple(map(lambda line: tuple(line.split("\t") + [user]), read_rstrip_file(path)[1:]))
+    return activity_data

@@ -4,21 +4,21 @@ from classes import Db
 
 
 def insert_users(db):
-    """ Inserts users from list """
+    """ Inserts users based on directory structure """
     all_users = utils.os.get_all_users()
-    labeled_users = utils.os.get_labeled_users(filter_ids=False)
-    to_be_inserted = []
-    for user in all_users:
-        to_be_inserted.append((user, user in labeled_users))
-    utils.db.insert_rows(db, queries.INSERT_USER, to_be_inserted, "Inserting users")
+    labeled_users = utils.os.get_labeled_ids()
+    users_to_insert = list(map(lambda usr: (usr, usr in labeled_users), all_users))
+    utils.db.insert_rows(db,
+                         queries.INSERT_USER,
+                         users_to_insert,
+                         f"Inserting {len(users_to_insert)} users")
 
 
-def insert_activities(db, names: list, user_id: int):
+def insert_activities(db):
     """ Inserts activities from list """
-    to_be_inserted = []
-    for name in names:
-        to_be_inserted.append((user_id, name))
-    utils.db.insert_rows(db, queries.INSERT_ACTIVITY, to_be_inserted)
+    activities_to_insert = utils.os.get_activities()
+    utils.db.insert_rows(db, queries.INSERT_ACTIVITY, activities_to_insert,
+                         f"Inserting {len(activities_to_insert)} activities")
 
 
 def cleanup(db: Db):
@@ -46,6 +46,7 @@ def main():
     clear_db(db)
     create_tables(db)
     insert_users(db)
+    insert_activities(db)
     cleanup(db)
 
 

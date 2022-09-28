@@ -16,10 +16,11 @@ CREATE_TABLE_ACTIVITY = f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME_ACTIVITY} (
                    user_id VARCHAR(30) NOT NULL,
                    start_date DATETIME,
                    end_date DATETIME,
-                   name VARCHAR(30),
+                   transportation_mode VARCHAR(30),
                    FOREIGN KEY (user_id) REFERENCES User(id))
                 """
-INSERT_ACTIVITY = f"INSERT INTO {TABLE_NAME_ACTIVITY} (user_id, start_date, end_date, name) VALUES (%s,%s,%s)"
+INSERT_ACTIVITY = f"INSERT INTO {TABLE_NAME_ACTIVITY} (end_date, start_date, transportation_mode, user_id) VALUES " \
+                  f"(%s,%s,%s,%s)"
 
 # TrackPoint
 CREATE_TABLE_TRACKPOINT = f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME_TRACKPOINT} (
