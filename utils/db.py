@@ -12,17 +12,17 @@ def show_tables(db):
     print(tabulate(rows, headers=db.cursor.column_names))
 
 
-def select_all(db, table_name, display_raw=False):
+def select(db, query, display_raw=False, display_table=False, table_name="UNDEFINED_TABLE"):
     """ Select all rows from table, format nicely and print """
-    query = "SELECT * FROM %s"
-    db.cursor.execute(query % table_name)
+    db.cursor.execute(query)
     rows = db.cursor.fetchall()
     if display_raw:
         print("Data from table %s, raw format:" % table_name)
         print(rows)
-    # Using tabulate to show the table in a nice way
-    print("Data from table %s, tabulated:" % table_name)
-    print(tabulate(rows, headers=db.cursor.column_names))
+    if display_table:
+        # Using tabulate to show the table in a nice way
+        print("Data from table %s, tabulated:" % table_name)
+        print(tabulate(rows, headers=db.cursor.column_names))
     return rows
 
 

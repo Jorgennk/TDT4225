@@ -1,11 +1,7 @@
 import os
+import re
+import datetime
 from decouple import config
-
-
-def read_trajectory_data(path) -> list:
-    """ Read trajectory data, ignore first 6 lines """
-    with open(path) as f:
-        return f.readlines()[6:]
 
 
 def read_rstrip_file(path) -> list:
@@ -38,6 +34,8 @@ def get_labeled_users() -> list:
     return list(filter(lambda labeled_id: labeled_id in all_users, labeled_ids))
 
 
+# ACTIVITIES
+
 def get_activities():
     """
     Get activity data for all users listed in labeled_ids.
@@ -50,3 +48,47 @@ def get_activities():
         # Format activity entries into a list
         activity_data += tuple(map(lambda line: tuple(line.split("\t") + [user]), read_rstrip_file(path)[1:]))
     return activity_data
+
+
+# TRACK POINTS
+
+def _is_float(string: str):
+    return re.match(r'^-?\d+(?:\.\d+)$', string)
+
+
+def _transform_trackpoint_line(line: str):
+    """ Convert trackpoint file line to tuple, convert float values to float, combine date and time cols """
+    line = list(map(
+        lambda elem: float(elem) if _is_float(elem)
+        else int(elem) if elem.isnumeric()
+        else elem,
+        line.rstrip("\n").split(",")))
+    line.pop(2)  # Always 0
+    line.pop(3)  # We use datetime instead
+    # merge date and time
+    date = line.pop(3)
+    time = line.pop(3)
+    line.append(datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S"))
+    return tuple(line)
+
+
+def read_trackpoint_data(path) -> list:
+    """ Read trajectory data, ignore first 6 lines """
+    with open(path) as f:
+        lines = f.readlines()[6:]
+        return list(map(lambda line: _transform_trackpoint_line(line), lines))
+
+
+def get_trackpoints(user_id: str) -> list:
+    """ Get list of trackpoints for user """
+    print(f"Getting trackpoints for user {user_id}")
+    base_path = os.path.join(config("DATASET_ROOT_PATH"), "dataset", "Data", user_id, "Trajectory")
+    data = []
+    counter = 1
+    for _, __, files in os.walk(base_path, topdown=False):
+        for filename in files:
+            full_path = os.path.join(base_path, filename)
+            print(f"\t...Reading trackpoints from file {counter} at {full_path}")
+            data += read_trackpoint_data(full_path)
+            counter += 1
+    return data
