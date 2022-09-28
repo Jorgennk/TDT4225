@@ -1,9 +1,9 @@
 from tabulate import tabulate
 
 
-def drop_table(db, table_name):
-    print(f"Dropping table {table_name}...")
-    execute_query(db, f"DROP TABLE {table_name}")
+def drop_table(db, table_name) -> bool:
+    """ Drop table. Return True if successful, False otherwise """
+    return execute_query(db, f"DROP TABLE {table_name}", f"Dropping table {table_name}...")
 
 
 def show_tables(db):
@@ -12,41 +12,62 @@ def show_tables(db):
     print(tabulate(rows, headers=db.cursor.column_names))
 
 
-def select_all(db, table_name):
+def select_all(db, table_name, display_raw=False):
     """ Select all rows from table, format nicely and print """
     query = "SELECT * FROM %s"
     db.cursor.execute(query % table_name)
     rows = db.cursor.fetchall()
-    print("Data from table %s, raw format:" % table_name)
-    print(rows)
+    if display_raw:
+        print("Data from table %s, raw format:" % table_name)
+        print(rows)
     # Using tabulate to show the table in a nice way
     print("Data from table %s, tabulated:" % table_name)
     print(tabulate(rows, headers=db.cursor.column_names))
     return rows
 
 
-def insert_row(db, query: str, payload: tuple):
-    """ Insert a single row """
+def insert_row(db, query: str, payload: tuple, message: str = None) -> bool:
+    """ Insert a single row. Return True if successful, False otherwise """
+    if message is not None:
+        print(message)
     try:
         db.cursor.execute(query % payload)
         db.db_connection.commit()
-    except:
+        print("\t...SUCCESS")
+        return True
+    except Exception as e:
+        print(e)
         db.db_connection.rollback()
+        return False
 
 
-def insert_rows(db, query: str, payload: list):
-    """ Insert multiple rows in batches. Payload must be a list of tuples """
+def insert_rows(db, query: str, payload: list, message: str = None) -> bool:
+    """
+    Insert multiple rows in batches. Payload must be a list of tuples. Return True if successful, False otherwise
+    """
+    if message is not None:
+        print(message)
     try:
         db.cursor.executemany(query, payload)
         db.db_connection.commit()
-    except:
+        print("\t...SUCCESS")
+        return True
+    except Exception as e:
+        print(e)
         db.db_connection.rollback()
+        return False
 
 
-def execute_query(db, query: str):
-    """ Execute query that requires no payload """
+def execute_query(db, query: str, message: str = None) -> bool:
+    """ Execute query that requires no payload. Return True if successful, False otherwise """
+    if message is not None:
+        print(message)
     try:
         db.cursor.execute(query)
         db.db_connection.commit()
-    except:
+        print("\t...SUCCESS")
+        return True
+    except Exception as e:
+        print(e)
         db.db_connection.rollback()
+        return False
