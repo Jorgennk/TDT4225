@@ -1,4 +1,4 @@
-from DbConnector import DbConnector
+from utils.db_connector import DbConnector
 from tabulate import tabulate
 
 
