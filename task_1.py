@@ -38,10 +38,7 @@ def insert_trackpoints(db):
             activities_dict[start_time] = {"end_time": end_time, "activity_id": activity_id}
         # get all track points for that user
         trackpoints = utils.os.get_trackpoints(user, activities_dict)
-        #print(trackpoints)
-        # FIXME: can we assume that all trackpoints within a single file are related to the same activity?
-        break
-    # binary search date_time of each trackpoint
+        utils.db.insert_rows(db, queries.INSERT_TRACKPOINT, trackpoints, f"\tInserting {len(trackpoints)} trackpoints for user {user}")
 
 
 def cleanup(db: Db):

@@ -85,8 +85,8 @@ def read_trackpoint_data(path, activities_dict: dict) -> list:
             return []
         include_trackpoint = False
         start_time = None
-        reached_end_time = False
         result = []
+        temp_result = []
         for line in lines:
             l = _transform_trackpoint_line(line)
             if not include_trackpoint and str(l[3]) in activities_dict:
@@ -94,21 +94,19 @@ def read_trackpoint_data(path, activities_dict: dict) -> list:
                 include_trackpoint = True
                 start_time = str(l[3])
             if include_trackpoint:
-                result.append(l + (activities_dict[start_time]["activity_id"],))
+                temp_result.append(l + (activities_dict[start_time]["activity_id"],))
             if start_time is None:
                 continue
             if str(l[3]) == str(activities_dict[start_time]["end_time"]):
                 print(f"\t\tLast trackpoint for activity {str(l[3])}: {l}")
                 include_trackpoint = False
                 start_time = None
-                reached_end_time = True
+                result += temp_result
+                temp_result.clear()
             if start_time is not None and l[3] > activities_dict[start_time]["end_time"]:
                 include_trackpoint = False
                 start_time = None
-                reached_end_time = True
-                result.clear()
-        if not reached_end_time:
-            result.clear()
+                temp_result.clear()
         return result
 
 

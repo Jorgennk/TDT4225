@@ -32,3 +32,4 @@ CREATE_TABLE_TRACKPOINT = f"""CREATE TABLE IF NOT EXISTS {TABLE_NAME_TRACKPOINT}
                     date_time DATETIME,
                     FOREIGN KEY (activity_id) REFERENCES {TABLE_NAME_ACTIVITY}(id))
                 """
+INSERT_TRACKPOINT = f"INSERT INTO {TABLE_NAME_TRACKPOINT} (lat, lon, altitude, date_time, activity_id) VALUES (%s,%s,%s,%s,%s)"
