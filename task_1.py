@@ -29,8 +29,16 @@ def insert_trackpoints(db):
         # get all activities for that user, sorted on start_date
         activities = utils.db.select(db,
                                      query=f"SELECT id, user_id, start_date, end_date FROM {queries.TABLE_NAME_ACTIVITY} WHERE user_id={user} ORDER BY start_date")
+        activities_dict = {}
+        print(activities[0])
+        for activity in activities:
+            start_time = str(activity[3])
+            end_time = activity[2]
+            activity_id = activity[0]
+            activities_dict[start_time] = {"end_time": end_time, "activity_id": activity_id}
         # get all track points for that user
-        trackpoints = utils.os.get_trackpoints(user)
+        trackpoints = utils.os.get_trackpoints(user, activities_dict)
+        #print(trackpoints)
         # FIXME: can we assume that all trackpoints within a single file are related to the same activity?
         break
     # binary search date_time of each trackpoint
@@ -58,12 +66,12 @@ def clear_db(db):
 
 def main():
     db = Db()
+    if False:
+        clear_db(db)
+        create_tables(db)
+        insert_users(db)
+        insert_activities(db)
     insert_trackpoints(db)
-    return
-    clear_db(db)
-    create_tables(db)
-    insert_users(db)
-    insert_activities(db)
     cleanup(db)
 
 
