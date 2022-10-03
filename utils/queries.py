@@ -55,7 +55,13 @@ GET_USERS_WITH_TAXI = f"""SELECT DISTINCT user_id from {TABLE_NAME_ACTIVITY} WHE
 GET_TRANSPORTATION_MODE_COUNT = f""" SELECT transportation_mode, COUNT(*) as count FROM(SELECT transportation_mode FROM {TABLE_NAME_ACTIVITY} WHERE transportation_mode IS NOT NULL) AS alias GROUP BY transportation_mode;"""
 
 #query6a
-GROUP_ACTIVITIES_BY_YEAR = f"""SELECT YEAR(start_date) AS year, COUNT(*) FROM {TABLE_NAME_ACTIVITY} GROUP BY year;"""
+GROUP_ACTIVITIES_BY_YEAR = f"""SELECT YEAR(start_date) AS year, COUNT(*) FROM {TABLE_NAME_ACTIVITY} GROUP BY year ORDER BY COUNT(*) DESC LIMIT 1;"""
+
+#query6b need to compare result with 6a
+YEAR_MOST_HOURS = f"""SELECT YEAR(start_date) AS year, SUM(TIMEDIFF(start_date, end_date))as hours FROM {TABLE_NAME_ACTIVITY} GROUP BY year ORDER BY hours DESC LIMIT 1;"""
+
+#query7
+
 
 #query6b
 
