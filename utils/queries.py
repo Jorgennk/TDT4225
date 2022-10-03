@@ -45,8 +45,17 @@ GET_TRACKPOINT_COUNT = f"""SELECT COUNT(*) FROM {TABLE_NAME_TRACKPOINT}"""
 #query 1 = summer alle ovenfor
 #query 2 = ta get_activity_count og del på get_user_count
 
-#query 3
+#query 3 returns 20 users with most activities
 GET_USERS_MOST_ACTIVITIES = f"""SELECT user_id, COUNT(*) AS count FROM {TABLE_NAME_ACTIVITY} GROUP BY user_id ORDER BY count DESC LIMIT 20"""
 
+#query4 gets users with transportation mode taxi
+GET_USERS_WITH_TAXI = f"""SELECT DISTINCT user_id from {TABLE_NAME_ACTIVITY} WHERE transportation_mode="taxi";"""
 
+#query5 Get 
+GET_TRANSPORTATION_MODE_COUNT = f""" SELECT transportation_mode, COUNT(*) as count FROM(SELECT transportation_mode FROM {TABLE_NAME_ACTIVITY} WHERE transportation_mode IS NOT NULL) AS alias GROUP BY transportation_mode;"""
+
+#query6a
+GROUP_ACTIVITIES_BY_YEAR = f"""SELECT YEAR(start_date) AS year, COUNT(*) FROM {TABLE_NAME_ACTIVITY} GROUP BY year;"""
+
+#query6b
 
