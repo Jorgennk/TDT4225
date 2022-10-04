@@ -70,5 +70,11 @@ TrackPoint ON  Activity.id=TrackPoint.activity_id WHERE Activity.user_id = 112 A
 Activity.transportation_mode = 'walk';"""
 
 
+#query8
+FIND_USERS_MOST_GAINED_ALTITUDE = f"""SELECT {TABLE_NAME_ACTIVITY}.user_id, SUM(gained_altitude_activity) * 0.3048 AS gained_altitude_total FROM (SELECT {TABLE_NAME_TRACKPOINT}.activity_id AS activity_id, GREATEST({TABLE_NAME_TRACKPOINT}.altitude - LAG({TABLE_NAME_TRACKPOINT}.altitude) OVER (ORDER BY {TABLE_NAME_TRACKPOINT}.id), 0) AS gained_altitude_activity FROM {TABLE_NAME_TRACKPOINT} WHERE altitude != -777) AS t LEFT JOIN {TABLE_NAME_ACTIVITY} on (t.activity_id = {TABLE_NAME_ACTIVITY}.id) GROUP BY {TABLE_NAME_ACTIVITY}.user_id ORDER BY gained_altitude_total DESC LIMIT 20;"""
+
+
+#query10
+FIND_USERS_IN_FORBIDDEN_CITY = f"""SELECT user_id, lat, lon FROM ({TABLE_NAME_ACTIVITY} INNER JOIN {TABLE_NAME_TRACKPOINT} ON {TABLE_NAME_ACTIVITY}.id = {TABLE_NAME_TRACKPOINT}.activity_id WHERE (({TABLE_NAME_TRACKPOINT}.lat BETWEEN 39.9155 AND 39.9165) AND ({TABLE_NAME_TRACKPOINT}.lon BETWEEN 116.3965 AND 116.3975)));"""
 
 

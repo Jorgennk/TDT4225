@@ -1,3 +1,4 @@
+from unittest import result
 from utils.db_connector import DbConnector
 import utils.db as db
 import utils.queries as queries
@@ -80,7 +81,19 @@ def task_7(db_conn: DbConnector):
     df['dist'] = df.apply(lambda row : distance(row['lat'], row['lon'], row.shift(periods=1)['lat'], row.shift(periods)['lon']), axis = 1)
     print(df.head())
 
+def task8(db_conn: DbConnector):
+    query = queries.FIND_USERS_MOST_GAINED_ALTITUDE
+    result = db.execute_query_get_result(db_conn, query)
+    df = pd.DataFrame(result, columns=['User:     ', "Gained altitude:"])
+    print("The 20 users with the most gained altitude are: ")
+    print(df)
 
+def task10(db_conn: DbConnector):
+    query = queries.FIND_USERS_IN_FORBIDDEN_CITY
+    result = db.execute_query_get_result(db_conn, query)
+    df = pd.DataFrame(result, columns=["User:  ", "Lat:  ", "Long:  "])
+    print("The users that have been in the forbidden city in Beijing are:  ")
+    print(df)
 
 def main():
     db_conn = DbConnector()
@@ -91,9 +104,10 @@ def main():
     #task5(db_conn)
     #task6a(db_conn)
     #task6b(db_conn)
-    task_7(db_conn)
+    #task_7(db_conn)
+    task8(db_conn)
+    task10(db_conn)
     db_conn.close_connection()
         
 if __name__ == "__main__":
     main()
-print("heyo")
