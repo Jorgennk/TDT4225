@@ -61,7 +61,14 @@ GROUP_ACTIVITIES_BY_YEAR = f"""SELECT YEAR(start_date) AS year, COUNT(*) FROM {T
 YEAR_MOST_HOURS = f"""SELECT YEAR(start_date) AS year, SUM(TIMEDIFF(start_date, end_date))as hours FROM {TABLE_NAME_ACTIVITY} GROUP BY year ORDER BY hours DESC LIMIT 1;"""
 
 #query7
+#Returns the a table with Activity.start_date, Activity.end_date, 
+#TrackPoint.activity_id, TrackPoint.lat, TrackPoint.lon
+
+FIND_TOTAL_DISTANCE_112 = f"""SELECT Activity.start_date, Activity.end_date, 
+TrackPoint.activity_id, TrackPoint.lat, TrackPoint.lon FROM Activity INNER JOIN 
+TrackPoint ON  Activity.id=TrackPoint.activity_id WHERE Activity.user_id = 112 AND
+Activity.transportation_mode = 'walk';"""
 
 
-#query6b
+
 

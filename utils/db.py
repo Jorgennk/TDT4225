@@ -71,3 +71,15 @@ def execute_query(db, query: str, message: str = None) -> bool:
         print(e)
         db.db_connection.rollback()
         return False
+
+def execute_query_get_result(db, query: str, message: str = None):
+    """ Execute query that requires no payload. Return True if successful, False otherwise """
+    if message is not None:
+        print(message)
+    try:
+        db.cursor.execute(query)
+        print("\t...SUCCESS")
+        return db.cursor.fetchall()
+    except Exception as e:
+        print(e)
+        return None
