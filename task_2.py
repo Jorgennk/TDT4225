@@ -85,7 +85,6 @@ def distance(in_lat, in_long, in_lat2, in_long2):
     lat_dist = abs(in_lat2 - in_lat)
     long_dist = abs(in_long2 - in_long)
     print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
-    
     euclidean_dist = np.sqrt(lat_dist**2 + long_dist**2)
     print(f"Distance: {euclidean_dist}")
     return euclidean_dist    
@@ -156,18 +155,18 @@ def task11(db_conn: DbConnector):
 
 def main():
     db_conn = DbConnector()
-    #task1(db_conn)
-    #task2(db_conn)
-    #task3(db_conn)
-    #task4(db_conn)
-    #task5(db_conn)
-    #task6a(db_conn)
-    #task6b(db_conn)
+    task1(db_conn)
+    task2(db_conn)
+    task3(db_conn)
+    task4(db_conn)
+    task5(db_conn)
+    task6a(db_conn)
+    task6b(db_conn)
     #task_7(db_conn)
-    #task8(db_conn)
+    task8(db_conn)
     task9(db_conn)
-    #task10(db_conn)
-    #task11(db_conn)
+    task10(db_conn)
+    task11(db_conn)
     db_conn.close_connection()
 
 
