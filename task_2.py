@@ -1,4 +1,5 @@
 from utils.db_connector import DbConnector
+from typing import Union
 import utils.db as db
 import utils.queries as queries
 import pandas as pd
@@ -11,7 +12,12 @@ def get_count(query: str, _db: DbConnector, msg: str = None):
     return db.execute_query_get_result(_db, query, print_success=False)[0][0]
 
 
+def print_task_number(no: Union[str, int]):
+    print(f"\n[============== TASK {no} ==============]\n")
+
+
 def task1(db_conn: DbConnector):
+    print_task_number(1)
     user_count = get_count(queries.GET_USER_COUNT, db_conn)
     activity_count = get_count(queries.GET_ACTIVITY_COUNT, db_conn)
     trackpoint_count = get_count(queries.GET_TRACKPOINT_COUNT, db_conn)
@@ -19,20 +25,23 @@ def task1(db_conn: DbConnector):
 
 
 def task2(db_conn: DbConnector):
+    print_task_number(2)
     activity_count = get_count(queries.GET_ACTIVITY_COUNT, db_conn, "Getting activities..,")
     user_count = get_count(queries.GET_USER_COUNT, db_conn, "Getting user count..")
     print(f"Average activity for user is activity count/user count = {round(activity_count/user_count, 2)}")
 
 
 def task3(db_conn: DbConnector):
+    print_task_number(3)
     query = queries.GET_USERS_MOST_ACTIVITIES
-    result = db.execute_query_get_result(db_conn, query)
+    result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=['user', 'activity_count'])
     print("The 20 users with the most activities are: ")
     print(df)
 
 
 def task4(db_conn: DbConnector):
+    print_task_number(4)
     query = queries.GET_USERS_WITH_TAXI
     result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=['Users'])
@@ -41,6 +50,7 @@ def task4(db_conn: DbConnector):
 
 
 def task5(db_conn: DbConnector):
+    print_task_number(5)
     query = queries.GET_TRANSPORTATION_MODE_COUNT
     result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=['Transportation mode', "Count"])
@@ -49,6 +59,7 @@ def task5(db_conn: DbConnector):
 
 
 def task6a(db_conn: DbConnector):
+    print_task_number("6a")
     query = queries.GROUP_ACTIVITIES_BY_YEAR
     result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=["Year", "Activity count"])
@@ -57,6 +68,7 @@ def task6a(db_conn: DbConnector):
 
 
 def task6b(db_conn: DbConnector):
+    print_task_number("6b")
     query6a = queries.GROUP_ACTIVITIES_BY_YEAR
     query6b = queries.YEAR_MOST_HOURS
     result_6b = db.execute_query_get_result(db_conn, query6b, print_success=False)[0][0]
@@ -80,19 +92,21 @@ def distance(in_lat, in_long, in_lat2, in_long2):
 
 
 def task_7(db_conn: DbConnector):
+    print_task_number(7)
     user_count = get_count(queries.GET_USER_COUNT, db_conn)
     query = queries.FIND_TOTAL_DISTANCE_112
-    result = db.execute_query_get_result(db_conn, query)
-    df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon',])
+    result = db.execute_query_get_result(db_conn, query, print_success=False)
+    df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon'])
 
     # df['dist'] = mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2)
     # df['dist'] = df.apply(lambda row: mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2), axis = 1)
 
     df['dist'] = df.apply(lambda row: distance(row['lat'], row['lon'], row.shift(periods=1)['lat'], row.shift(periods=1)['lon']), axis=1)
-    # print(df.head())
+    print(df.head())
 
 
 def task8(db_conn: DbConnector):
+    print_task_number(8)
     query = queries.FIND_USERS_MOST_GAINED_ALTITUDE
     result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=['User:     ', "Gained altitude:"])
@@ -100,12 +114,43 @@ def task8(db_conn: DbConnector):
     print(df)
 
 
+def task9(db_conn: DbConnector):
+    print_task_number(9)
+    query = queries.FIND_INVALID_ACTIVITIES
+    result = db.execute_query_get_result(db_conn, query, print_success=False)
+    df = pd.DataFrame(result, columns=['User ID:     ', "Invalid activity count:"])
+    print(df)
+
+
 def task10(db_conn: DbConnector):
+    print_task_number(10)
     print("We search for users with lat in [39.9, 40.1] and lon in [116.3, 116.4].")
     query = queries.FIND_USERS_IN_FORBIDDEN_CITY
     result = db.execute_query_get_result(db_conn, query, print_success=False)
     df = pd.DataFrame(result, columns=["User:  ", "Lat:  ", "Long:  "])
     print("The users that have been in the forbidden city in Beijing are:  ")
+    print(df)
+    print("\nSince only 1 user was in Beijing, we choose to show all records with lat and lon coordinates.")
+
+
+def task11(db_conn: DbConnector):
+    print_task_number(11)
+    print("We first retrieve a list of users, transportation mode, and the number of times they have been recorded using that transportation mode.")
+    print("We then use python to find the most common transportation modes for each user.")
+    print("Using dictionaries, we can achieve linear complexity O(N) for the Python code, where N is the number of labeled users.")
+    query = queries.FIND_TRANSPORTATION_MODE_COUNT
+    result_dict: dict = {}
+    result = db.execute_query_get_result(db_conn, query, print_success=False)
+    for row in result:
+        uid: str = row[0]
+        count: int = row[2]
+        if uid not in result_dict:
+            result_dict[uid] = row
+            continue
+        if result_dict[uid][2] < count:
+            result_dict[uid] = row
+    df = pd.DataFrame(list(result_dict.values()), columns=["user_id:  ", "transportation_mode:  ", "count:  "])
+    print("\nThe most common transportation mode for each user (with counts) is:")
     print(df)
 
 
@@ -120,7 +165,9 @@ def main():
     #task6b(db_conn)
     #task_7(db_conn)
     #task8(db_conn)
-    task10(db_conn)
+    task9(db_conn)
+    #task10(db_conn)
+    #task11(db_conn)
     db_conn.close_connection()
 
 
