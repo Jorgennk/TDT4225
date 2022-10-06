@@ -79,3 +79,7 @@ FIND_USERS_MOST_GAINED_ALTITUDE = f"""SELECT {TABLE_NAME_ACTIVITY}.user_id, SUM(
 FIND_USERS_IN_FORBIDDEN_CITY = f"""SELECT user_id, lat, lon FROM (SELECT user_id, lat, lon, (lon BETWEEN 116.3 AND 116.4) AS lonBeijing, (lat BETWEEN 39.9 AND 40.1) AS latBeijing FROM {TABLE_NAME_ACTIVITY} INNER JOIN {TABLE_NAME_TRACKPOINT} ON {TABLE_NAME_ACTIVITY}.id = {TABLE_NAME_TRACKPOINT}.activity_id WHERE lat=40.088203) x WHERE lonBeijing=1;"""
 
 
+#query11
+FIND_SORTED_ACTIVITY_AMOUNT = f"""SELECT transportation_mode as 'Transportation mode',COUNT(*) as Activities FROM Activity WHERE user_id = (%s) GR
+OUP BY transportation_mode ORDER BY Activities DESC;
+"""

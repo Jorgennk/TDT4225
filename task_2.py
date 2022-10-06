@@ -80,7 +80,6 @@ def distance(in_lat, in_long, in_lat2, in_long2):
 
 
 def task_7(db_conn: DbConnector):
-    #user_count = get_count(queries.GET_USER_COUNT, db_conn)
     query = queries.FIND_TOTAL_DISTANCE_112
     result = db.execute_query_get_result(db_conn, query)
     df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon',])
@@ -95,15 +94,8 @@ def task_7(db_conn: DbConnector):
             list_of_distance.append(0)
         last = e
 
-    indices = []
-    #[indices.append(j) for j in range(len(list_of_distance))]
     df.insert(4, column='distance',value=pd.Series(list_of_distance))
     print(df.head())
-    # df['dist'] = mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2)
-    # df['dist'] = df.apply(lambda row: mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2), axis = 1)
-
-    #df['dist'] = df.apply(lambda row: distance(row['lat'], row['lon'], row.shift(periods=1)['lat'], row.shift(periods=1)['lon']), axis=1)
-    # print(df.head())
 
 
 def task8(db_conn: DbConnector):
@@ -123,6 +115,19 @@ def task10(db_conn: DbConnector):
     print(df)
 
 
+def task11(db_conn: DbConnector):
+    import utils
+    import utils.queries as queries
+
+    query = queries.FIND_SORTED_ACTIVITY_AMOUNT
+    labeled_users = utils.os.get_labeled_ids()
+    results = []
+    for user in labeled_users:
+        result = db.execute_query(db_conn, query, user)
+        results.append(result)
+
+    print(results)
+
 def main():
     db_conn = DbConnector()
     #task1(db_conn)
@@ -132,9 +137,10 @@ def main():
     #task5(db_conn)
     #task6a(db_conn)
     #task6b(db_conn)
-    task_7(db_conn)
+    #task_7(db_conn)
     #task8(db_conn)
     #task10(db_conn)
+    task11(db_conn)
     db_conn.close_connection()
 
 
