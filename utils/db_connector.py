@@ -10,7 +10,7 @@ class DbConnector:
     """
     def __init__(self,
                  host="tdt4225-24.idi.ntnu.no",
-                 db="db_gr24",
+                 db="db24_clone",
                  user="gr24",
                  password=config("DB_PASS")):
         # Connect to the database

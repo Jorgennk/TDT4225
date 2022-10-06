@@ -58,27 +58,30 @@ def insert_rows(db, query: str, payload: list, message: str = None) -> bool:
         return False
 
 
-def execute_query(db, query: str, message: str = None) -> bool:
+def execute_query(db, query: str, message: str = None, print_success=True) -> bool:
     """ Execute query that requires no payload. Return True if successful, False otherwise """
     if message is not None:
         print(message)
     try:
         db.cursor.execute(query)
         db.db_connection.commit()
-        print("\t...SUCCESS")
+        if print_success:
+            print("\t...SUCCESS")
         return True
     except Exception as e:
         print(e)
         db.db_connection.rollback()
         return False
 
-def execute_query_get_result(db, query: str, message: str = None):
+
+def execute_query_get_result(db, query: str, message: str = None, print_success=True):
     """ Execute query that requires no payload. Return True if successful, False otherwise """
     if message is not None:
         print(message)
     try:
         db.cursor.execute(query)
-        print("\t...SUCCESS")
+        if print_success:
+            print("\t...SUCCESS")
         return db.cursor.fetchall()
     except Exception as e:
         print(e)
