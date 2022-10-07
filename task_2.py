@@ -100,7 +100,7 @@ def distance(in_lat, in_long, in_lat2, in_long2):
 
 #In hindsight, this could probably be done in the query, HA
 def task_7(db_conn: DbConnector):
-    print("Processing task 7...")
+    print_task_number(7)
     query = queries.FIND_TOTAL_DISTANCE_112
     result = db.execute_query_get_result(db_conn, query)
     df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon',])
@@ -181,6 +181,7 @@ def main():
     task6b(db_conn)
     task_7(db_conn)
     task8(db_conn)
+    task9(db_conn)
     task10(db_conn)
     task11(db_conn)
     db_conn.close_connection()
