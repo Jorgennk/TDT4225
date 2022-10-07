@@ -74,8 +74,15 @@ def distance(in_lat, in_long, in_lat2, in_long2):
     long_dist = abs(in_long2 - in_long)
     print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
     
-    euclidean_dist = np.sqrt(lat_dist**2 + long_dist**2)
-    print(f"Distance: {euclidean_dist}")
+    #Assuming that the Earth is a sphere with a circumference of 40075 km.
+    #adjust for earth curvature
+    #This adjusts for 1 degree of latitude/longitude
+    len_lat = 111.32 #km
+    len_lon = 40075* np.cos( in_lat ) / 360 #km
+    euclidean_dist = np.sqrt((lat_dist*len_lat)**2 + (long_dist*len_lon)**2)
+
+
+    print(f"Distance: {euclidean_dist} km")
     return euclidean_dist    
 
 
