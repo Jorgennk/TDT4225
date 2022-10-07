@@ -84,24 +84,42 @@ def task6b(db_conn: DbConnector):
 def distance(in_lat, in_long, in_lat2, in_long2):
     lat_dist = abs(in_lat2 - in_lat)
     long_dist = abs(in_long2 - in_long)
-    print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
-    euclidean_dist = np.sqrt(lat_dist**2 + long_dist**2)
-    print(f"Distance: {euclidean_dist}")
+    #print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
+    
+    #Assuming that the Earth is a sphere with a circumference of 40075 km.
+    #adjust for earth curvature
+    #This adjusts for 1 degree of latitude/longitude
+    len_lat = 111.32 #km
+    len_lon = 40075* np.cos( in_lat ) / 360 #km
+    euclidean_dist = np.sqrt((lat_dist*len_lat)**2 + (long_dist*len_lon)**2)
+
+
+    #print(f"Distance: {euclidean_dist} km")
     return euclidean_dist    
 
 
+#In hindsight, this could probably be done in the query, HA
 def task_7(db_conn: DbConnector):
     print_task_number(7)
-    user_count = get_count(queries.GET_USER_COUNT, db_conn)
     query = queries.FIND_TOTAL_DISTANCE_112
-    result = db.execute_query_get_result(db_conn, query, print_success=False)
-    df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon'])
-
-    # df['dist'] = mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2)
-    # df['dist'] = df.apply(lambda row: mt.sqrt((df['lat']-df['lat'].shift())**2 + (df['lon']- df['lon'].shift())**2), axis = 1)
-
-    df['dist'] = df.apply(lambda row: distance(row['lat'], row['lon'], row.shift(periods=1)['lat'], row.shift(periods=1)['lon']), axis=1)
-    print(df.head())
+    result = db.execute_query_get_result(db_conn, query)
+    df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon',])
+    
+    #print the eaculidean distance between the trackpoints
+    print("Finding distance walked for user 112...")
+    last = None
+    list_of_distance = []
+    for e in df.itertuples():
+        if last:
+            list_of_distance.append(distance(e[4], e[5], last[4], last[5]))
+            #print(e[0], e[1], e[2], e[3], e[4], e[5])
+        else:
+            list_of_distance.append(0)
+        last = e
+    df.insert(4, column='distance',value=pd.Series(list_of_distance))
+    
+    #print(df.head())
+    print(f"Total distance walked for user_id 112 (in km): {sum(list_of_distance)}")
 
 
 def task8(db_conn: DbConnector):
@@ -152,7 +170,6 @@ def task11(db_conn: DbConnector):
     print("\nThe most common transportation mode for each user (with counts) is:")
     print(df)
 
-
 def main():
     db_conn = DbConnector()
     task1(db_conn)
@@ -162,7 +179,7 @@ def main():
     task5(db_conn)
     task6a(db_conn)
     task6b(db_conn)
-    #task_7(db_conn)
+    task_7(db_conn)
     task8(db_conn)
     task9(db_conn)
     task10(db_conn)
