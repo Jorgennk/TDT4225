@@ -72,7 +72,7 @@ def task6b(db_conn: DbConnector):
 def distance(in_lat, in_long, in_lat2, in_long2):
     lat_dist = abs(in_lat2 - in_lat)
     long_dist = abs(in_long2 - in_long)
-    print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
+    #print(f"lat1: {in_lat}, lon1: {in_long} lat2: {in_lat2}, lon2: {in_long2}")
     
     #Assuming that the Earth is a sphere with a circumference of 40075 km.
     #adjust for earth curvature
@@ -100,9 +100,9 @@ def task_7(db_conn: DbConnector):
         else:
             list_of_distance.append(0)
         last = e
-
     df.insert(4, column='distance',value=pd.Series(list_of_distance))
     print(df.head())
+    print(f"Total distance walked for user_id 112 (in km): {sum(list_of_distance)}")
 
 
 def task8(db_conn: DbConnector):
@@ -144,10 +144,10 @@ def main():
     #task5(db_conn)
     #task6a(db_conn)
     #task6b(db_conn)
-    #task_7(db_conn)
+    task_7(db_conn)
     #task8(db_conn)
     #task10(db_conn)
-    task11(db_conn)
+    #task11(db_conn)
     db_conn.close_connection()
 
 
