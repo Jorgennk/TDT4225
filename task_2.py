@@ -172,17 +172,17 @@ def task11(db_conn: DbConnector):
 
 def main():
     db_conn = DbConnector()
-    #task1(db_conn)
-    #task2(db_conn)
-    #task3(db_conn)
-    #task4(db_conn)
-    #task5(db_conn)
-    #task6a(db_conn)
-    #task6b(db_conn)
+    task1(db_conn)
+    task2(db_conn)
+    task3(db_conn)
+    task4(db_conn)
+    task5(db_conn)
+    task6a(db_conn)
+    task6b(db_conn)
     task_7(db_conn)
-    #task8(db_conn)
-    #task10(db_conn)
-    #task11(db_conn)
+    task8(db_conn)
+    task10(db_conn)
+    task11(db_conn)
     db_conn.close_connection()
 
 
