@@ -82,15 +82,19 @@ def distance(in_lat, in_long, in_lat2, in_long2):
     euclidean_dist = np.sqrt((lat_dist*len_lat)**2 + (long_dist*len_lon)**2)
 
 
-    print(f"Distance: {euclidean_dist} km")
+    #print(f"Distance: {euclidean_dist} km")
     return euclidean_dist    
 
 
+#In hindsight, this could probably be done in the query, HA
 def task_7(db_conn: DbConnector):
+    print("Processing task 7...")
     query = queries.FIND_TOTAL_DISTANCE_112
     result = db.execute_query_get_result(db_conn, query)
     df = pd.DataFrame(result, columns=['start_date', 'end_date', 'activity_id', 'lat', 'lon',])
+    
     #print the eaculidean distance between the trackpoints
+    print("Finding distance walked for user 112...")
     last = None
     list_of_distance = []
     for e in df.itertuples():
@@ -101,7 +105,8 @@ def task_7(db_conn: DbConnector):
             list_of_distance.append(0)
         last = e
     df.insert(4, column='distance',value=pd.Series(list_of_distance))
-    print(df.head())
+    
+    #print(df.head())
     print(f"Total distance walked for user_id 112 (in km): {sum(list_of_distance)}")
 
 
@@ -120,20 +125,6 @@ def task10(db_conn: DbConnector):
     df = pd.DataFrame(result, columns=["User:  ", "Lat:  ", "Long:  "])
     print("The users that have been in the forbidden city in Beijing are:  ")
     print(df)
-
-
-def task11(db_conn: DbConnector):
-    import utils
-    import utils.queries as queries
-
-    query = queries.FIND_SORTED_ACTIVITY_AMOUNT
-    labeled_users = utils.os.get_labeled_ids()
-    results = []
-    for user in labeled_users:
-        result = db.execute_query(db_conn, query, user)
-        results.append(result)
-
-    print(results)
 
 def main():
     db_conn = DbConnector()
