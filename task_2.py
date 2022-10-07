@@ -109,25 +109,32 @@ def task_7(db_conn: DbConnector):
     #print the eaculidean distance between the trackpoints
     print("Finding distance walked for user 112...")
     last = None
-    distance_sorted = []
-    list_of_distance = []
+
+    #list of different distances, always start with 0 and not starting/ending points between 
+    # activities
+    distance_sorted = [] 
+    list_of_distance = [] #Used for tmp storage of distances
     for e in df.itertuples():
         if last:
+            #Create new list if we change activity
             if last_activity_id != e.activity_id:
                 distance_sorted.append(list_of_distance)
                 list_of_distance = []
                 list_of_distance.append(0)
             else:
                 list_of_distance.append(distance(e[4], e[5], last[4], last[5]))
-                #print(e[0], e[1], e[2], e[3], e[4], e[5])
+                #print(e[0], e[1], e[2], e[3], e[4], e[5]) #debug
         else:
             list_of_distance.append(0)
         #print(distance_sorted)
         last = e
         last_activity_id = e[3]
-    df.insert(4, column='distance',value=pd.Series(list_of_distance))
+    
+    #df.insert(4, column='distance',value=pd.Series(list_of_distance)) #Old, doesn't work anymore but keep in case we need
     
     #print(df.head())
+
+    #Sum distances for different activities
     sum_of_distance = 0
     for item in distance_sorted:
         sum_of_distance += sum(item)
