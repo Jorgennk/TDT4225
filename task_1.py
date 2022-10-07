@@ -63,11 +63,10 @@ def clear_db(db):
 
 def main():
     db = Db()
-    if False:
-        clear_db(db)
-        create_tables(db)
-        insert_users(db)
-        insert_activities(db)
+    clear_db(db)
+    create_tables(db)
+    insert_users(db)
+    insert_activities(db)
     insert_trackpoints(db)
     cleanup(db)
 
