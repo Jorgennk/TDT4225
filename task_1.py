@@ -53,6 +53,10 @@ def create_tables(db: Db):
     utils.db.execute_query(db, queries.CREATE_TABLE_ACTIVITY, message=m(queries.TABLE_NAME_ACTIVITY))
     utils.db.execute_query(db, queries.CREATE_TABLE_TRACKPOINT, message=m(queries.TABLE_NAME_TRACKPOINT))
 
+def prune_activities(db: Db):
+    """ Removes the activites that have no trackpoints """
+    utils.db.execute_query(db, queries.REMOVE_ACTIVITY_WO_TRACKPOINT, message=None)
+
 
 def clear_db(db):
     """ Drop all tables """
@@ -68,6 +72,7 @@ def main():
     insert_users(db)
     insert_activities(db)
     insert_trackpoints(db)
+    prune_activities(db)
     cleanup(db)
 
 
