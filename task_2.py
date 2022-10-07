@@ -1,3 +1,4 @@
+from unittest.util import sorted_list_difference
 from utils.db_connector import DbConnector
 from typing import Union
 import utils.db as db
@@ -108,18 +109,29 @@ def task_7(db_conn: DbConnector):
     #print the eaculidean distance between the trackpoints
     print("Finding distance walked for user 112...")
     last = None
+    distance_sorted = []
     list_of_distance = []
     for e in df.itertuples():
         if last:
-            list_of_distance.append(distance(e[4], e[5], last[4], last[5]))
-            #print(e[0], e[1], e[2], e[3], e[4], e[5])
+            if last_activity_id != e.activity_id:
+                distance_sorted.append(list_of_distance)
+                list_of_distance = []
+                list_of_distance.append(0)
+            else:
+                list_of_distance.append(distance(e[4], e[5], last[4], last[5]))
+                #print(e[0], e[1], e[2], e[3], e[4], e[5])
         else:
             list_of_distance.append(0)
+        #print(distance_sorted)
         last = e
+        last_activity_id = e[3]
     df.insert(4, column='distance',value=pd.Series(list_of_distance))
     
     #print(df.head())
-    print(f"Total distance walked for user_id 112 (in km): {sum(list_of_distance)}")
+    sum_of_distance = 0
+    for item in distance_sorted:
+        sum_of_distance += sum(item)
+    print(f"Total distance walked for user_id 112 (in km): {sum_of_distance}")
 
 
 def task8(db_conn: DbConnector):
